@@ -1,5 +1,6 @@
 package com.matsuo.centum7.fragmentsample;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -15,7 +16,43 @@ public class TitlesFragment extends ListFragment {
     public final static String EXTRA_POSITION =
             "com.matsuo.centum7.fragmentsample.POSITION";
 
-   public TitlesFragment (){}
+    private OnTitleSelectedListener listener;
+
+    //２画面かどうかを判断する変数
+    private boolean isDualPane;
+
+
+    public TitlesFragment (){}
+
+    public interface OnTitleSelectedListener{
+        public void onTitleSelected(int position);
+    }
+
+
+    /*fragmentがactivityにAttachされた時に、かならずonAttachが実装される。*/
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        try{
+            listener = (OnTitleSelectedListener) activity;
+        }catch (ClassCastException e){
+            /*インターフェイスが実装されていなかった時に例外を投げる。*/
+            throw new ClassCastException(activity.toString()+
+                    "must implement onTitleSelected");
+        }
+    }
+
+    /*
+    fragmentがactivityから離された時の処理をonDetachに記述
+    */
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        /* Listenerを無効化*/
+        listener = null;
+    }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
@@ -26,15 +63,30 @@ public class TitlesFragment extends ListFragment {
                 android.R.layout.simple_expandable_list_item_1,
                 News.Titles
         ));
+
+        /* Acitivty作られた時に　activityの中にdetialframeがあるか判断します。*/
+
+        View detailFrame = getActivity().findViewById(R.id.detailFrame);
+
+        /*
+        * isDualPaneがtrueになるのは　detailFrameがnullではない場合とdetailFrameがない場合
+        *
+        * */
+        isDualPane = detailFrame != null && detailFrame.getVisibility() == View.VISIBLE;
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
-        Intent intent =new Intent(getActivity(),SubActivity.class);
-        intent.putExtra(EXTRA_POSITION,position);
-        startActivity(intent);
+        if(isDualPane){
+            listener.onTitleSelected(position);
+        }else{
 
+
+            Intent intent =new Intent(getActivity(),SubActivity.class);
+            intent.putExtra(EXTRA_POSITION,position);
+            startActivity(intent);
+        }
 
     }
 
