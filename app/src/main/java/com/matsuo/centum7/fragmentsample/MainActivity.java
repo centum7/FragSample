@@ -18,9 +18,11 @@ public class MainActivity extends AppCompatActivity implements TitlesFragment.On
 
         /*右側に配置*/
 
+        /* addToBackStackでfragmentの履歴を保持*/
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.detailFrame,detailFragment)
+                .addToBackStack(null)
                 .commit();
     }
 }

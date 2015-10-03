@@ -17,6 +17,7 @@ public class TitlesFragment extends ListFragment {
             "com.matsuo.centum7.fragmentsample.POSITION";
 
     private OnTitleSelectedListener listener;
+    private int mSavedPosition;
 
     //２画面かどうかを判断する変数
     private boolean isDualPane;
@@ -25,7 +26,7 @@ public class TitlesFragment extends ListFragment {
     public TitlesFragment (){}
 
     public interface OnTitleSelectedListener{
-        public void onTitleSelected(int position);
+         void onTitleSelected(int position);
     }
 
 
@@ -73,11 +74,33 @@ public class TitlesFragment extends ListFragment {
         *
         * */
         isDualPane = detailFrame != null && detailFrame.getVisibility() == View.VISIBLE;
+
+
+        /*　Acitivityが再起動したときに、値を取り出す。*/
+
+        if(isDualPane) {
+            if(savedInstanceState != null) {
+                mSavedPosition = savedInstanceState.getInt("save_position");
+            } else {
+                mSavedPosition = 0;
+            }
+
+            /*左側のリストをクリックした時に呼ばれる処理をmSavePositionで呼ぶ。*/
+            listener.onTitleSelected(mSavedPosition);
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("save_position",mSavedPosition);
     }
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
+        mSavedPosition = position;
+
         if(isDualPane){
             listener.onTitleSelected(position);
         }else{
